@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>С днём рождения</title>
+  <meta name="description" content="Небольшой сайт-квест на день рождения" />
+  <meta name="theme-color" content="#10131a" />
+  <style>
+    :root {
+      --bg: #10131a;
+      --bg-soft: #171b24;
+      --card: rgba(255, 255, 255, 0.08);
+      --card-strong: rgba(255, 255, 255, 0.13);
+      --text: #f4f0e8;
+      --muted: #c9bdab;
+      --accent: #ffd166;
+      --accent-2: #ef476f;
+      --accent-3: #06d6a0;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      --radius: 26px;
+      --max: 980px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      scroll-behavior: smooth;
+      background:
+        radial-gradient(circle at top left, rgba(255, 209, 102, 0.16), transparent 36rem),
+        radial-gradient(circle at bottom right, rgba(6, 214, 160, 0.12), transparent 32rem),
+        var(--bg);
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.045;
+      background-image:
+        linear-gradient(115deg, transparent 0%, rgba(255,255,255,.25) 50%, transparent 100%);
+      mix-blend-mode: overlay;
+    }
+
+    .page {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+      padding: 42px 0 64px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+      align-items: stretch;
+      min-height: 430px;
+    }
+
+    .panel {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.055));
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      backdrop-filter: blur(18px);
+    }
+
+    .intro {
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 28px;
+    }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(255, 209, 102, 0.12);
+      border: 1px solid rgba(255, 209, 102, 0.3);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(40px, 7vw, 74px);
+      line-height: 0.94;
+      letter-spacing: -0.07em;
+    }
+
+    .subtitle {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: clamp(16px, 2.2vw, 20px);
+      line-height: 1.55;
+      max-width: 62ch;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 16px;
+      min-height: 48px;
+      padding: 14px 18px;
+      cursor: pointer;
+      background: var(--accent);
+      color: #241800;
+      font-weight: 900;
+      box-shadow: 0 12px 30px rgba(255, 209, 102, 0.18);
+      transition: transform .18s ease, filter .18s ease, background .18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    .btn.secondary {
+      background: rgba(255,255,255,.11);
+      color: var(--text);
+      box-shadow: none;
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--muted);
+      box-shadow: none;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .status-card {
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .status-content {
+      min-height: 100%;
+      display: grid;
+      gap: 14px;
+      align-content: center;
+    }
+
+    .terminal {
+      border-radius: 20px;
+      background: rgba(0,0,0,.32);
+      border: 1px solid rgba(255,255,255,.1);
+      padding: 16px;
+      overflow: hidden;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #d7ffe8;
+      font-size: 13px;
+      line-height: 1.55;
+      min-height: 172px;
+    }
+
+    .terminal span {
+      display: block;
+      opacity: 0;
+      transform: translateY(6px);
+      animation: lineIn .55s ease forwards;
+    }
+
+    .terminal span:nth-child(2) { animation-delay: .22s; }
+    .terminal span:nth-child(3) { animation-delay: .44s; }
+    .terminal span:nth-child(4) { animation-delay: .66s; }
+    .terminal span:nth-child(5) { animation-delay: .88s; }
+
+    @keyframes lineIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .mini {
+      padding: 15px;
+      border-radius: 18px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .mini b {
+      display: block;
+      font-size: 23px;
+      color: var(--accent);
+      letter-spacing: -.04em;
+    }
+
+    .mini small {
+      color: var(--muted);
+    }
+
+    .quest {
+      display: none;
+      margin-top: 24px;
+      padding: 28px;
+    }
+
+    .quest.active {
+      display: block;
+      animation: appear .28s ease both;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .progress-wrap {
+      flex: 1;
+      height: 12px;
+      background: rgba(255,255,255,.08);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.09);
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-3));
+      border-radius: inherit;
+      transition: width .35s ease;
+    }
+
+    .step {
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    .question-title {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1;
+      letter-spacing: -.045em;
+    }
+
+    .question-note {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .answer {
+      min-height: 86px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      border-radius: 20px;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, border .18s ease;
+      font-weight: 750;
+      line-height: 1.28;
+    }
+
+    .answer:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.11);
+      border-color: rgba(255,255,255,.24);
+    }
+
+    .answer.correct {
+      background: rgba(6,214,160,.17);
+      border-color: rgba(6,214,160,.55);
+    }
+
+    .answer.wrong {
+      background: rgba(255,107,107,.15);
+      border-color: rgba(255,107,107,.5);
+    }
+
+    .feedback {
+      min-height: 30px;
+      margin-top: 16px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .feedback.good {
+      color: #a8ffd6;
+    }
+
+    .feedback.bad {
+      color: #ffd1d1;
+    }
+
+    .final {
+      display: none;
+      margin-top: 24px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .final.active {
+      display: block;
+      animation: appear .35s ease both;
+    }
+
+    .final-hero {
+      min-height: 440px;
+      display: grid;
+      place-items: center;
+      padding: 44px 30px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 15%, rgba(255,209,102,.20), transparent 18rem),
+        radial-gradient(circle at 15% 95%, rgba(239,71,111,.12), transparent 22rem),
+        linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.05));
+    }
+
+    .final-inner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 760px;
+    }
+
+    .final h2 {
+      margin: 0;
+      font-size: clamp(42px, 8vw, 92px);
+      line-height: .92;
+      letter-spacing: -.075em;
+    }
+
+    .final p {
+      color: var(--muted);
+      font-size: clamp(17px, 2.5vw, 22px);
+      line-height: 1.55;
+      margin: 22px auto 0;
+      max-width: 60ch;
+    }
+
+    .big-message {
+      margin-top: 24px;
+      padding: 22px;
+      border-radius: 22px;
+      background: rgba(0,0,0,.20);
+      border: 1px solid rgba(255,255,255,.12);
+      text-align: left;
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 17px;
+      white-space: normal;
+    }
+
+    .sections {
+      display: grid;
+      gap: 18px;
+      padding: 22px;
+    }
+
+    .section {
+      padding: 22px;
+      border-radius: 22px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .section h3 {
+      margin: 0 0 14px;
+      font-size: 24px;
+      letter-spacing: -.03em;
+    }
+
+    .simple-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .simple-list li {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.065);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+
+    .shake {
+      animation: shake .3s ease;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    canvas#confetti {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    @media (max-width: 780px) {
+      :root {
+        --radius: 22px;
+      }
+
+      .page {
+        width: min(100% - 20px, var(--max));
+        padding-top: max(12px, env(safe-area-inset-top));
+        padding-bottom: max(34px, env(safe-area-inset-bottom));
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        min-height: auto;
+      }
+
+      .panel {
+        border-radius: 22px;
+      }
+
+      .intro,
+      .status-card,
+      .quest {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: clamp(38px, 13vw, 56px);
+        line-height: 0.96;
+        letter-spacing: -0.065em;
+      }
+
+      .subtitle {
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+        min-height: 52px;
+        padding: 14px 16px;
+      }
+
+      .terminal {
+        min-height: 142px;
+        font-size: 12px;
+        padding: 14px;
+        border-radius: 18px;
+      }
+
+      .mini-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .mini {
+        padding: 13px;
+      }
+
+      .mini b {
+        font-size: 21px;
+      }
+
+      .quest {
+        margin-top: 14px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .progress-wrap {
+        width: 100%;
+      }
+
+      .step {
+        font-size: 13px;
+      }
+
+      .question-title {
+        font-size: clamp(26px, 8vw, 36px);
+        line-height: 1.05;
+      }
+
+      .question-note {
+        margin-bottom: 16px;
+        font-size: 15px;
+      }
+
+      .answers {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .answer {
+        min-height: auto;
+        padding: 16px;
+        border-radius: 18px;
+        font-size: 15px;
+      }
+
+      .feedback {
+        margin-top: 12px;
+        font-size: 14px;
+      }
+
+      .final {
+        margin-top: 14px;
+      }
+
+      .final-hero {
+        min-height: auto;
+        padding: 32px 20px;
+      }
+
+      .final h2 {
+        font-size: clamp(42px, 14vw, 58px);
+        line-height: 0.94;
+      }
+
+      .final p {
+        margin-top: 16px;
+        font-size: 16px;
+      }
+
+      .big-message {
+        margin-top: 18px;
+        padding: 18px;
+        font-size: 16px;
+        line-height: 1.65;
+      }
+
+      .sections {
+        padding: 14px;
+        gap: 14px;
+      }
+
+      .section {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .section h3 {
+        font-size: 22px;
+      }
+
+      .simple-list li {
+        padding: 13px 14px;
+      }
+
+      .gallery {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .page {
+        width: calc(100% - 18px);
+      }
+
+      .badge {
+        padding: 8px 11px;
+        font-size: 11px;
+      }
+
+      .intro,
+      .status-card,
+      .quest {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: clamp(36px, 12.5vw, 52px);
+      }
+
+      .final-hero {
+        padding: 28px 18px;
+      }
+
+      .big-message {
+        font-size: 15.5px;
+      }
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .btn:hover,
+      .answer:hover {
+        transform: none;
+        filter: none;
+      }
+
+      .btn:active,
+      .answer:active {
+        transform: scale(0.985);
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="noise"></div>
+
+  <main class="page">
+    <section class="hero" id="startScreen">
+      <div class="panel intro">
+        <div>
+          <div class="badge">🎂 Небольшой сайт-квест</div>
+          <h1>Поздравление закрыто.</h1>
+          <p class="subtitle">
+            Я хотел сделать не просто обычное сообщение, а маленький сайт.
+            Поэтому тут есть несколько вопросов, а в конце откроется поздравление.
+          </p>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="startBtn">Начать квест</button>
+          <button class="btn secondary" id="skipBtn">Открыть поздравление сразу</button>
+        </div>
+      </div>
+
+      <aside class="panel status-card">
+        <div class="status-content">
+          <div class="terminal" aria-label="status terminal">
+            <span>&gt; loading birthday_quest...</span>
+            <span>&gt; usual_message: too simple</span>
+            <span>&gt; personal_words: difficult</span>
+            <span>&gt; servers_bought: 0</span>
+            <span>&gt; final_message: locked</span>
+          </div>
+
+          <div class="mini-grid">
+            <div class="mini">
+              <b>5</b>
+              <small>вопросов</small>
+            </div>
+            <div class="mini">
+              <b>1</b>
+              <small>финал</small>
+            </div>
+            <div class="mini">
+              <b>0</b>
+              <small>серверов</small>
+            </div>
+            <div class="mini">
+              <b>✓</b>
+              <small>сделано специально</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel quest" id="questScreen" aria-live="polite">
+      <div class="topbar">
+        <div class="progress-wrap" aria-label="Прогресс">
+          <div class="progress" id="progressBar"></div>
+        </div>
+        <div class="step" id="stepLabel">Вопрос 1 / 5</div>
+      </div>
+
+      <h2 class="question-title" id="questionTitle">Вопрос</h2>
+      <p class="question-note" id="questionNote">Подсказка</p>
+
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+    </section>
+
+    <section class="panel final" id="finalScreen">
+      <div class="final-hero">
+        <div class="final-inner">
+          <div class="badge">🎉 Поздравление открыто</div>
+          <h2>С днём рождения</h2>
+          <p>
+            Квест пройден. Можно открыть финальный текст.
+          </p>
+
+          <div class="big-message">
+            С днём рождения, папа.<br><br>
+
+            Я хотел сделать не просто обычное сообщение, а небольшой сайт-квест.
+            Он получился немного странным, но зато сделан специально для тебя.<br><br>
+
+            Желаю тебе здоровья, спокойствия, сил и побольше нормальных дней без лишней суеты.<br><br>
+
+            С днём рождения.
+          </div>
+
+          <div class="actions" style="justify-content:center; margin-top:22px;">
+            <button class="btn" id="confettiBtn">Ещё конфетти</button>
+            <button class="btn secondary" id="restartBtn">Пройти заново</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sections">
+        <div class="section">
+          <h3>Что внутри этого сайта</h3>
+          <ul class="simple-list" id="simpleList"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /*
+      === ГДЕ МЕНЯТЬ СОДЕРЖАНИЕ ===
+
+      Этот сайт специально сделан спокойнее:
+      без фальшивых "лучший папа на свете" и без слишком тёплого текста через силу.
+
+      1. В QUESTIONS меняются вопросы, варианты и правильный ответ.
+      2. В SIMPLE_ITEMS меняется нижний блок "Что внутри этого сайта".
+      3. В блоке .big-message в HTML можно изменить главный текст поздравления.
+    */
+
+    const QUESTIONS = [
+      {
+        title: "Проверка №1: что это вообще такое?",
+        note: "Обычное сообщение было бы слишком простым, поэтому появился этот сайт.",
+        correct: 2,
+        answers: [
+          "Сломанный интернет",
+          "Секретный государственный портал",
+          "Небольшой сайт-квест на день рождения",
+          "Ошибка, которую лучше не трогать"
+        ],
+        success: "Верно. Это сайт-квест. Никакой бюрократии, почти чудо.",
+        fail: "Нет. Хотя интернет часто выглядит именно так."
+      },
+      {
+        title: "Проверка №2: зачем он сделан?",
+        note: "Иногда проще собрать целую страницу, чем написать одно обычное сообщение.",
+        correct: 0,
+        answers: [
+          "Потому что обычное сообщение казалось слишком пустым",
+          "Потому что кнопки сами себя не нажмут",
+          "Потому что бумажная открытка не умеет конфетти",
+          "Потому что сервер купить не получилось"
+        ],
+        success: "Да. Обычное сообщение было бы слишком мало для этой идеи.",
+        fail: "Не совсем. Хотя про конфетти спорить трудно."
+      },
+      {
+        title: "Проверка №3: что иногда сложнее всего?",
+        note: "Этот вопрос подозрительно личный, но без драмы. Просто факт.",
+        correct: 3,
+        answers: [
+          "Найти нужный кабель",
+          "Понять, куда исчез пульт",
+          "Объяснить технике, что она должна работать",
+          "Сказать важные вещи словами"
+        ],
+        success: "Да. Поэтому этот сайт вообще существует.",
+        fail: "Нет. Это проблема, но не главная в этом квесте."
+      },
+      {
+        title: "Проверка №4: какой тут правильный режим?",
+        note: "Спокойно пройти вопросы и открыть финал. Без лишней суеты.",
+        correct: 1,
+        answers: [
+          "Нажать всё подряд",
+          "Спокойно пройти вопросы",
+          "Закрыть сайт и сделать вид, что так и было",
+          "Потребовать техподдержку"
+        ],
+        success: "Верно. Спокойный режим включён.",
+        fail: "Нет. Хаос сегодня не основной сценарий."
+      },
+      {
+        title: "Финальная проверка",
+        note: "Что должно открыться в конце?",
+        correct: 1,
+        answers: [
+          "Ошибка 404",
+          "Поздравление",
+          "Секретная база данных",
+          "Новая семейная бюрократия"
+        ],
+        success: "Доступ открыт.",
+        fail: "Нет. Ошибки 404 сегодня не приглашали."
+      }
+    ];
+
+    const SIMPLE_ITEMS = [
+      "Это не просто обычное сообщение.",
+      "Это небольшой квест, сделанный специально для тебя.",
+      "Он немного странный, но в этом и смысл.",
+      "В конце всё равно главное: с днём рождения."
+    ];
+
+    const startScreen = document.getElementById("startScreen");
+    const questScreen = document.getElementById("questScreen");
+    const finalScreen = document.getElementById("finalScreen");
+
+    const startBtn = document.getElementById("startBtn");
+    const skipBtn = document.getElementById("skipBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const confettiBtn = document.getElementById("confettiBtn");
+
+    const progressBar = document.getElementById("progressBar");
+    const stepLabel = document.getElementById("stepLabel");
+    const questionTitle = document.getElementById("questionTitle");
+    const questionNote = document.getElementById("questionNote");
+    const answersEl = document.getElementById("answers");
+    const feedback = document.getElementById("feedback");
+    const simpleList = document.getElementById("simpleList");
+
+    let currentQuestion = 0;
+    let locked = false;
+
+    function startQuest() {
+      currentQuestion = 0;
+      startScreen.classList.add("hidden");
+      finalScreen.classList.remove("active");
+      questScreen.classList.add("active");
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      locked = false;
+      const question = QUESTIONS[currentQuestion];
+      const progress = (currentQuestion / QUESTIONS.length) * 100;
+
+      progressBar.style.width = progress + "%";
+      stepLabel.textContent = `Вопрос ${currentQuestion + 1} / ${QUESTIONS.length}`;
+      questionTitle.textContent = question.title;
+      questionNote.textContent = question.note;
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      answersEl.innerHTML = "";
+
+      question.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "answer";
+        button.textContent = answer;
+        button.addEventListener("click", () => chooseAnswer(button, index));
+        answersEl.appendChild(button);
+      });
+    }
+
+    function chooseAnswer(button, index) {
+      if (locked) return;
+
+      const question = QUESTIONS[currentQuestion];
+      const isCorrect = index === question.correct;
+
+      if (!isCorrect) {
+        button.classList.add("wrong", "shake");
+        feedback.textContent = question.fail;
+        feedback.className = "feedback bad";
+        setTimeout(() => button.classList.remove("wrong", "shake"), 420);
+        return;
+      }
+
+      locked = true;
+      button.classList.add("correct");
+      feedback.textContent = question.success;
+      feedback.className = "feedback good";
+      progressBar.style.width = ((currentQuestion + 1) / QUESTIONS.length) * 100 + "%";
+
+      setTimeout(() => {
+        currentQuestion += 1;
+        if (currentQuestion >= QUESTIONS.length) {
+          showFinal();
+        } else {
+          renderQuestion();
+        }
+      }, 900);
+    }
+
+    function showFinal() {
+      questScreen.classList.remove("active");
+      startScreen.classList.add("hidden");
+      finalScreen.classList.add("active");
+      renderFinalContent();
+      fireConfetti(180);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderFinalContent() {
+      simpleList.innerHTML = "";
+      SIMPLE_ITEMS.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        simpleList.appendChild(li);
+      });
+    }
+
+    function restart() {
+      startScreen.classList.remove("hidden");
+      questScreen.classList.remove("active");
+      finalScreen.classList.remove("active");
+      progressBar.style.width = "0%";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    startBtn.addEventListener("click", startQuest);
+    skipBtn.addEventListener("click", showFinal);
+    restartBtn.addEventListener("click", restart);
+    confettiBtn.addEventListener("click", () => fireConfetti(160));
+
+    // Простой canvas-confetti без внешних библиотек.
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    let pieces = [];
+    let animationId = null;
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function fireConfetti(count = 150) {
+      const colors = ["#ffd166", "#ef476f", "#06d6a0", "#118ab2", "#f4f0e8"];
+
+      for (let i = 0; i < count; i++) {
+        pieces.push({
+          x: Math.random() * window.innerWidth,
+          y: -20 - Math.random() * window.innerHeight * 0.3,
+          w: 6 + Math.random() * 9,
+          h: 8 + Math.random() * 12,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speed: 2.5 + Math.random() * 5,
+          drift: -1.8 + Math.random() * 3.6,
+          rotation: Math.random() * Math.PI,
+          spin: -0.16 + Math.random() * 0.32,
+          life: 1
+        });
+      }
+
+      if (!animationId) animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      pieces = pieces.filter(piece => piece.y < window.innerHeight + 40 && piece.life > 0);
+
+      pieces.forEach(piece => {
+        piece.x += piece.drift;
+        piece.y += piece.speed;
+        piece.rotation += piece.spin;
+        piece.life -= 0.002;
+
+        ctx.save();
+        ctx.translate(piece.x, piece.y);
+        ctx.rotate(piece.rotation);
+        ctx.globalAlpha = Math.max(piece.life, 0);
+        ctx.fillStyle = piece.color;
+        ctx.fillRect(-piece.w / 2, -piece.h / 2, piece.w, piece.h);
+        ctx.restore();
+      });
+
+      if (pieces.length) {
+        animationId = requestAnimationFrame(animateConfetti);
+      } else {
+        animationId = null;
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      }
+    }
+  </script>
+</body>
+</html>
